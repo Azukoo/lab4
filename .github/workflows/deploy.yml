@@ -1,3 +1,4 @@
+# .github/workflows/deploy.yml
 name: Deploy Release to GitHub Pages
 
 on:
@@ -5,9 +6,7 @@ on:
     types: [published]
 
 permissions:
-  contents: read
-  pages: write
-  id-token: write
+  contents: write
 
 jobs:
   deploy:
@@ -19,18 +18,14 @@ jobs:
       - name: Get version
         run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
 
-      - name: Build versioned site
+      - name: Prepare site
         run: |
-          mkdir -p ./public/"$VERSION"
-          cp -r ru en index.html ./public/"$VERSION"/
+          mkdir -p site/"$VERSION"
+          cp -r ru en index.html site/"$VERSION"/
 
-      - name: Setup Pages
-        uses: actions/configure-pages@v5
-
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+      - name: Deploy to gh-pages
+        uses: peaceiris/actions-gh-pages@v4
         with:
-          path: ./public
-
-      - name: Deploy
-        uses: actions/deploy-pages@v4
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./site
+          keep_files: true
